@@ -1,5 +1,3 @@
-const { debug } = require("console");
-
 const express = require("express");
 const app = express();
 const server = require("http").Server(app);

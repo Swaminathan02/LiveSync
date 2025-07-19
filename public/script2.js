@@ -7,7 +7,7 @@ myvideo.muted = true;
 var peer = new Peer(undefined, {
   path: "/peerjs",
   host: "/",
-  port: "443",
+  port: "3030",
 });
 
 let videoStream;
@@ -129,6 +129,41 @@ const setPlayVideo = () => {
   `;
   document.querySelector(".main_video_button").innerHTML = html;
 };
+
+document.getElementById("share_screen").addEventListener("click", async () => {
+  try {
+    const screenStream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: true,
+    });
+    const screenTrack = screenStream.getVideoTracks()[0];
+    Object.values(peer).forEach((call) => {
+      const sender = call.peerConnection
+        .getSenders()
+        .find((s) => s.track.kind === "video");
+      if (sender) sender.replaceTrack(screenTrack);
+    });
+    const video = document.createElement("video");
+    video.srcObject = screenStream;
+    video.play();
+    document.getElementById("video-grid").appendChild(video);
+    screenTrack.onended = async () => {
+      const camStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      const camTrack = camStream.getVideoTracks()[0];
+      Object.values(peer).forEach((call) => {
+        const sender = call.peerConnection
+          .getSenders()
+          .find((s) => s.track.kind === "video");
+        if (sender) sender.replaceTrack(camTrack);
+      });
+    };
+  } catch (err) {
+    console.error("Screen sharing failed:", err);
+  }
+});
 
 const leaveMeeting = function () {
   if (videoStream) {
