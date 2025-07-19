@@ -1,4 +1,4 @@
-const socket = io("/");
+const socket = io();
 
 const videoGrid = document.getElementById("video-grid");
 const myvideo = document.createElement("video");
@@ -7,7 +7,7 @@ myvideo.muted = true;
 var peer = new Peer(undefined, {
   path: "/peerjs",
   host: "/",
-  port: "3030",
+  port: location.protocol === "https:" ? 443 : 3030,
 });
 
 let videoStream;
