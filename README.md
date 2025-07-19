@@ -13,6 +13,7 @@
 - 👨‍💻 Join via unique room links
 - 📱 Responsive layout with styled controls
 - 🔐 Securely hosted on Render with HTTPS
+- *Looking forward to extending the platform with user authentication, authorization using MongoDB, and improving mobile responsiveness.*
 
 ## 🛠 Tech Stack
 
