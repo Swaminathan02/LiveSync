@@ -1,0 +1,4 @@
+-> Video and Audio Communication in Real time
+-> Implement Screen share ability
+-> Include Observer Design Pattern for sending messages by 
+   Host of meeting

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/jpeg" href="/icon/icon-ls.jpg" sizes="64x64" />
+    <title>LiveSync</title>
+    <link href="style.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body>
+    <h1 class="heading">Welcome to LiveSync</h1>
+
+    <div class="auth-container">
+      <div class="auth-section">
+        Old User?
+        <button id="login" href="login.html">Login</button>
+      </div>
+      <div class="auth-section">
+        New User?
+        <button id="signup">Sign Up</button>
+      </div>
+    </div>
+
+    <br /><br />
+
+    <div id="first">
+      <button id="create">Create a Metting</button>
+    </div>
+    <br /><br />
+
+    <form action="/join-room" method="GET" id="first">
+      <input type="text" name="roomId" placeholder="Enter Room ID" required />
+      <button type="submit" id="join">Join Meeting</button>
+    </form>
+  </body>
+  <script src="script.js"></script>
+</html>
