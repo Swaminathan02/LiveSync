@@ -41,9 +41,17 @@ io.on("connection", (socket) => {
     const roomId = socket.roomId;
     io.to(roomId).emit("createMessage", msg);
   });
+  socket.on("start-screen-share", () => {
+    const roomId = socket.roomId;
+    socket.broadcast.to(roomId).emit("screen-share-started", socket.id);
+  });
+  socket.on("stop-screen-share", () => {
+    const roomId = socket.roomId;
+    socket.broadcast.to(roomId).emit("screen-share-stopped", socket.id);
+  });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3030;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

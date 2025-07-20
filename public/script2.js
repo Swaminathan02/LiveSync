@@ -136,29 +136,45 @@ document.getElementById("share_screen").addEventListener("click", async () => {
       video: true,
       audio: true,
     });
+
     const screenTrack = screenStream.getVideoTracks()[0];
-    Object.values(peer).forEach((call) => {
-      const sender = call.peerConnection
-        .getSenders()
-        .find((s) => s.track.kind === "video");
-      if (sender) sender.replaceTrack(screenTrack);
-    });
-    const video = document.createElement("video");
-    video.srcObject = screenStream;
-    video.play();
-    document.getElementById("video-grid").appendChild(video);
+
+    // Replace local video stream being sent to peers
+    for (let connId in peer.connections) {
+      peer.connections[connId].forEach((conn) => {
+        const sender = conn.peerConnection
+          .getSenders()
+          .find((s) => s.track.kind === "video");
+        if (sender) {
+          sender.replaceTrack(screenTrack);
+        }
+      });
+    }
+    const screenVideo = document.createElement("video");
+    screenVideo.srcObject = screenStream;
+    screenVideo.classList.add("screen-share-video");
+    screenVideo.addEventListener("loadedmetadata", () => screenVideo.play());
+    videoGrid.appendChild(screenVideo);
+
     screenTrack.onended = async () => {
       const camStream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       });
       const camTrack = camStream.getVideoTracks()[0];
-      Object.values(peer).forEach((call) => {
-        const sender = call.peerConnection
-          .getSenders()
-          .find((s) => s.track.kind === "video");
-        if (sender) sender.replaceTrack(camTrack);
-      });
+
+      for (let connId in peer.connections) {
+        peer.connections[connId].forEach((conn) => {
+          const sender = conn.peerConnection
+            .getSenders()
+            .find((s) => s.track.kind === "video");
+          if (sender) {
+            sender.replaceTrack(camTrack);
+          }
+        });
+      }
+
+      screenVideo.remove();
     };
   } catch (err) {
     console.error("Screen sharing failed:", err);
