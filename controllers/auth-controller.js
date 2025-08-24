@@ -31,7 +31,7 @@ export const registeruser = async (req, res) => {
           email: newUser.email,
         },
         process.env.JWT_SECRET_KEY,
-        { expiresIn: "30m" }
+        { expiresIn: "2h" }
       );
       // Set cookie with JWT token
       res.cookie("token", accessToken, {
@@ -82,7 +82,7 @@ export const loginuser = async (req, res) => {
         email: findUser.email,
       },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "30m" }
+      { expiresIn: "2h" }
     );
     // Set cookie with JWT token
     res.cookie("token", accessToken, {
