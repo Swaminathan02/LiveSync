@@ -8,7 +8,18 @@ var peer = new Peer(undefined, {
   path: "/peerjs",
   host: "/",
   port: location.protocol === "https:" ? 443 : 3030,
+  config: {
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" }, // Free Google STUN
+      {
+        urls: "turn:relay1.expressturn.com:3478",
+        username: "000000002071414040", 
+        credential: "j2pgZ9Yboh5X2I5+Ewl46wvd88M=",
+      },
+    ],
+  },
 });
+
 
 let videoStream;
 const peers = {}; // Keep track of peer connections
