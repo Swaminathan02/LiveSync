@@ -10,90 +10,73 @@
     />
     <link
       rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
     />
-    <title>LiveSync-Meet</title>
+    <title>LiveSync-Meet - <%= roomId %></title>
     <link rel="icon" type="image/jpeg" href="/icon/icon-ls.jpg" sizes="64x64" />
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      const ROOM_ID = "<%= roomId%>";
+      const ROOM_ID = "<%= roomId %>";
+      const USERNAME = "<%= username %>";
+      console.log("Room ID:", ROOM_ID);
+      console.log("Username:", USERNAME);
     </script>
   </head>
   <body>
-    <div class="main">
-      <div class="main_left">
-        <div class="main_video">
-          <div id="video-grid">
-            <!-- <span class="tex">Me</span> -->
-          </div>
-        </div>
-
-        <div class="main_control">
-          <div class="main_control_block">
-            <div
-              onclick="muteUnmute()"
-              class="main_control_button main_mute_button"
-            >
-              <i class="fa-solid fa-microphone fa-1x"></i>
-              <span>Mute</span>
-            </div>
-            <div
-              onclick="playStop()"
-              class="main_control_button main_video_button"
-            >
-              <i class="fa-solid fa-video fa-1x"></i>
-              <span>Stop Video</span>
-            </div>
-          </div>
-
-          <div class="main_control_block">
-            <div class="main_control_button">
-              <i class="fas fa-user-friends"></i>
-              <span>Participants</span>
-            </div>
-            <div class="main_control_button" id="share_screen">
-              <i class="fa-solid fa-display"></i>
-              <span>Share Screen</span>
-            </div>
-            <div class="main_control_button">
-              <i class="fas fa-comment-alt"></i>
-              <span>Chat</span>
-            </div>
-          </div>
-
-          <div class="main_control_block">
-            <div
-              onclick="leaveMeeting()"
-              class="main_control_button"
-              id="leave"
-            >
-              <span class="leave_meeting">Leave Meeting</span>
-            </div>
-          </div>
-        </div>
+    <div id="main-meet-wrapper">
+      <div class="video-grid" id="video-grid">
+        <!-- JS adds each <video> here -->
       </div>
-
-      <div class="main_right">
-        <div class="main_header">
-          <h6>Chat</h6>
+      <aside class="chat-sidebar">
+        <div class="chat-title">
+          Chat
+          <small class="text-muted">(You are: <%= username %>)</small>
         </div>
-
-        <div class="main_chat_window">
-          <ul class="messages"></ul>
-        </div>
-
-        <div class="main_msg_container">
+        <ul class="messages"></ul>
+        <div class="chat-input-wrapper">
           <input
             type="text"
-            id="chat_msg"
-            placeholder="Type your messages..."
+            id="chat-input"
+            class="chat-input"
+            placeholder="Type your messages and press Enter..."
           />
         </div>
-      </div>
+      </aside>
     </div>
+
+    <nav class="controls-bar">
+      <button class="control-btn main_mute_button" onclick="muteUnmute()">
+        <i class="fas fa-microphone"></i><span>Mute</span>
+      </button>
+      <button class="control-btn main_video_button" onclick="playStop()">
+        <i class="fas fa-video"></i><span>Stop Video</span>
+      </button>
+      <button class="control-btn">
+        <i class="fas fa-users"></i><span>Participants</span>
+      </button>
+      <button class="control-btn" id="share_screen">
+        <i class="fas fa-desktop"></i><span>Share Screen</span>
+      </button>
+      <button class="control-btn" onclick="toggleChat()">
+        <i class="fas fa-comments"></i><span>Chat</span>
+      </button>
+      <button class="leave-btn" onclick="leaveMeeting()">Leave Meeting</button>
+    </nav>
+
+    <script>
+      // Toggle chat visibility
+      function toggleChat() {
+        const chatSidebar = document.querySelector('.chat-sidebar');
+        chatSidebar.style.display = chatSidebar.style.display === 'none' ? 'block' : 'none';
+      }
+    </script>
   </body>
   <script src="script2.js"></script>
 </html>

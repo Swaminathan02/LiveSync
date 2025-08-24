@@ -9,25 +9,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
   <body>
-    <h1 class="heading">Welcome to LiveSync</h1>
-
-    <div class="auth-container">
-      <div class="auth-section">
-        Old User?
-        <button id="login" href="login.html">Login</button>
-      </div>
-      <div class="auth-section">
-        New User?
-        <button id="signup">Sign Up</button>
-      </div>
+    <div id="main-meet-wrapper">
+      <div class="video-grid" id="video-grid"></div>
+      <aside class="chat-sidebar">
+        <div class="chat-title">Chat</div>
+        <ul class="messages"></ul>
+        <div class="chat-input-wrapper">
+          <input
+            type="text"
+            id="chat-input"
+            class="chat-input"
+            placeholder="Type your messages..."
+          />
+        </div>
+      </aside>
     </div>
-
-    <br /><br />
-
-    <div id="first">
-      <button id="create">Create a Metting</button>
-    </div>
-    <br /><br />
 
     <form action="/join-room" method="GET" id="first">
       <input type="text" name="roomId" placeholder="Enter Room ID" required />

@@ -11,6 +11,8 @@ var peer = new Peer(undefined, {
 });
 
 let videoStream;
+const peers = {}; // Keep track of peer connections
+
 navigator.mediaDevices
   .getUserMedia({
     video: true,
@@ -28,63 +30,104 @@ navigator.mediaDevices
       });
     });
 
-    socket.on("user-connected", (userid) => {
+    socket.on("user-connected", (userid, username) => {
+      console.log(`User connected: ${username} (${userid})`);
       setTimeout(() => {
         connectToNewUser(userid, videoStream);
       }, 1000); // short delay ensures the new peer is ready
     });
 
-    let txt = $("input");
-
+    // Handle chat input with Enter key
+    let txt = $("#chat-input");
+    
     $("html").keydown((event) => {
       if (event.which == 13 && txt.val().length !== 0) {
-        console.log(txt.val());
-        socket.emit("message", txt.val());
+        console.log(`Sending message: ${txt.val()}`);
+        socket.emit("message", { 
+          text: txt.val(), 
+          username: USERNAME 
+        });
         txt.val("");
       }
     });
 
+    // Listen for incoming messages
     socket.on("createMessage", (msg) => {
-      $(".messages").append(`<li class= "msg"><b>user</b> <br> ${msg}</li>`);
+      console.log(`Received message from ${msg.username}: ${msg.text}`);
+      $(".messages").append(
+        `<li class="msg"><b>${msg.username}:</b> <br> ${msg.text}</li>`
+      );
+      scrollBottom();
     });
-    scrollBottom();
+
+    socket.on("user-disconnected", (userid) => {
+      console.log(`User disconnected: ${userid}`);
+      if (peers[userid]) {
+        peers[userid].close(); // triggers call.on("close")
+        delete peers[userid];
+      }
+    });
+
+    // Handle username updates
+    socket.on("username-updated", (data) => {
+      console.log(`Username updated: ${data.userId} -> ${data.newName}`);
+      // You can update the UI to reflect the new username if needed
+    });
+  })
+  .catch(err => {
+    console.error("Error accessing media devices:", err);
   });
 
 peer.on("open", (id) => {
-  socket.emit("join-room", ROOM_ID, id);
+  console.log(`Peer opened with ID: ${id}, joining room: ${ROOM_ID} as ${USERNAME}`);
+  // Send username to server when joining room
+  socket.emit("join-room", ROOM_ID, id, USERNAME);
 });
 
 const connectToNewUser = function (userid, stream) {
+  console.log(`Connecting to new user: ${userid}`);
   const call = peer.call(userid, stream);
   const video = document.createElement("video");
   call.on("stream", (userVideoStream) => {
     addVideoStream(video, userVideoStream);
   });
+  call.on("close", () => {
+    video.remove();
+  });
+  peers[userid] = call; // Store peer connection
 };
 
-const addVideoStream = function (video, stream) {
+function addVideoStream(video, stream) {
   video.srcObject = stream;
   video.addEventListener("loadedmetadata", () => {
     video.play();
   });
   videoGrid.append(video);
-};
+}
 
 const scrollBottom = function () {
-  let div = $(".main_chat_window");
+  let div = $(".messages").parent(); // Target the messages container
   div.scrollTop(div.prop("scrollHeight"));
 };
 
-const muteUnmute = function () {
-  const enabled = videoStream.getAudioTracks()[0].enabled;
-  if (enabled) {
-    videoStream.getAudioTracks()[0].enabled = false;
-    setUnmuteButton();
-  } else {
-    setMuteButton();
-    videoStream.getAudioTracks()[0].enabled = true;
+function muteUnmute() {
+  if (!videoStream) {
+    console.log("No videoStream available for muteUnmute");
+    return;
   }
-};
+  const audioTrack = videoStream.getAudioTracks()[0];
+  if (!audioTrack) {
+    console.log("No audio track found");
+    return;
+  }
+  audioTrack.enabled = !audioTrack.enabled;
+  console.log("Audio track enabled:", audioTrack.enabled);
+  if (audioTrack.enabled) {
+    setMuteButton();
+  } else {
+    setUnmuteButton();
+  }
+}
 
 const setMuteButton = () => {
   const html = `
@@ -102,21 +145,28 @@ const setUnmuteButton = () => {
   document.querySelector(".main_mute_button").innerHTML = html;
 };
 
-const playStop = function () {
-  console.log("object");
-  let enabled = videoStream.getVideoTracks()[0].enabled;
-  if (enabled) {
-    videoStream.getVideoTracks()[0].enabled = false;
-    setPlayVideo();
-  } else {
-    setStopVideo();
-    videoStream.getVideoTracks()[0].enabled = true;
+function playStop() {
+  if (!videoStream) {
+    console.log("No videoStream available for playStop");
+    return;
   }
-};
+  const videoTrack = videoStream.getVideoTracks()[0];
+  if (!videoTrack) {
+    console.log("No video track found");
+    return;
+  }
+  videoTrack.enabled = !videoTrack.enabled;
+  console.log("Video track enabled:", videoTrack.enabled);
+  if (videoTrack.enabled) {
+    setStopVideo();
+  } else {
+    setPlayVideo();
+  }
+}
 
 const setStopVideo = () => {
   const html = `
-    <i class="fas fa-video "></i>
+    <i class="fas fa-video"></i>
     <span>Stop Video</span>
   `;
   document.querySelector(".main_video_button").innerHTML = html;
@@ -124,11 +174,25 @@ const setStopVideo = () => {
 
 const setPlayVideo = () => {
   const html = `
-  <i class="stop fas fa-video-slash"></i>
+    <i class="stop fas fa-video-slash"></i>
     <span>Start Video</span>
   `;
   document.querySelector(".main_video_button").innerHTML = html;
 };
+
+// Add click event listeners for mute and video buttons
+document.addEventListener('DOMContentLoaded', () => {
+  const muteButton = document.querySelector('.main_mute_button');
+  const videoButton = document.querySelector('.main_video_button');
+  
+  if (muteButton) {
+    muteButton.addEventListener('click', muteUnmute);
+  }
+  
+  if (videoButton) {
+    videoButton.addEventListener('click', playStop);
+  }
+});
 
 document.getElementById("share_screen").addEventListener("click", async () => {
   try {
@@ -138,58 +202,92 @@ document.getElementById("share_screen").addEventListener("click", async () => {
     });
 
     const screenTrack = screenStream.getVideoTracks()[0];
+    
+    // Notify others about screen sharing
+    socket.emit("start-screen-share");
 
     // Replace local video stream being sent to peers
-    for (let connId in peer.connections) {
-      peer.connections[connId].forEach((conn) => {
-        const sender = conn.peerConnection
+    for (let userId in peers) {
+      if (peers[userId] && peers[userId].peerConnection) {
+        const sender = peers[userId].peerConnection
           .getSenders()
-          .find((s) => s.track.kind === "video");
+          .find((s) => s.track && s.track.kind === "video");
         if (sender) {
           sender.replaceTrack(screenTrack);
         }
-      });
-    }
-    const screenVideo = document.createElement("video");
-    screenVideo.srcObject = screenStream;
-    screenVideo.classList.add("screen-share-video");
-    screenVideo.addEventListener("loadedmetadata", () => screenVideo.play());
-    videoGrid.appendChild(screenVideo);
-
-    screenTrack.onended = async () => {
-      const camStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      const camTrack = camStream.getVideoTracks()[0];
-
-      for (let connId in peer.connections) {
-        peer.connections[connId].forEach((conn) => {
-          const sender = conn.peerConnection
-            .getSenders()
-            .find((s) => s.track.kind === "video");
-          if (sender) {
-            sender.replaceTrack(camTrack);
-          }
-        });
       }
+    }
 
-      screenVideo.remove();
+    // Replace local video display
+    myvideo.srcObject = screenStream;
+    
+    screenTrack.onended = async () => {
+      try {
+        const camStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        const camTrack = camStream.getVideoTracks()[0];
+        
+        // Notify others that screen sharing stopped
+        socket.emit("stop-screen-share");
+
+        // Replace screen share with camera for all peers
+        for (let userId in peers) {
+          if (peers[userId] && peers[userId].peerConnection) {
+            const sender = peers[userId].peerConnection
+              .getSenders()
+              .find((s) => s.track && s.track.kind === "video");
+            if (sender) {
+              sender.replaceTrack(camTrack);
+            }
+          }
+        }
+
+        // Replace local video display back to camera
+        videoStream = camStream;
+        myvideo.srcObject = camStream;
+      } catch (err) {
+        console.error("Failed to switch back to camera:", err);
+      }
     };
   } catch (err) {
     console.error("Screen sharing failed:", err);
   }
 });
 
+// Listen for screen sharing events from other users
+socket.on("screen-share-started", (userId) => {
+  console.log(`User ${userId} started screen sharing`);
+  // You can add visual indicators here
+});
+
+socket.on("screen-share-stopped", (userId) => {
+  console.log(`User ${userId} stopped screen sharing`);
+  // You can remove visual indicators here
+});
+
 const leaveMeeting = function () {
+  console.log("Leaving meeting...");
+  
   if (videoStream) {
     videoStream.getTracks().forEach((track) => track.stop());
   }
+  
+  // Close all peer connections
+  for (let userId in peers) {
+    if (peers[userId]) {
+      peers[userId].close();
+    }
+  }
+  
   if (peer && peer.destroy) {
     peer.destroy();
   }
+  
   if (socket && socket.disconnect) {
     socket.disconnect();
   }
-  window.location.href = "/";
+  
+  window.location.href = "/dashboard";
 };

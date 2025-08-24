@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Livesync</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/jpeg" href="/icon/icon-ls.jpg" sizes="64x64" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="project-title">Livesync</h1>
+      <div class="form-container">
+        <div id="login-form" class="form active">
+          <h2>Login</h2>
+          <input
+            type="text"
+            id="login-username"
+            placeholder="Username"
+            required
+          />
+          <input
+            type="password"
+            id="login-password"
+            placeholder="Password"
+            required
+          />
+          <button onclick="loginUser()">Login</button>
+          <p>
+            Don't have an account?
+            <span class="link" onclick="showSignup()">Sign up</span>
+          </p>
+        </div>
+
+        <div id="signup-form" class="form">
+          <h2>Signup</h2>
+          <input
+            type="text"
+            id="signup-username"
+            placeholder="Username"
+            required
+          />
+          <input type="email" id="signup-email" placeholder="Email" required />
+          <input
+            type="password"
+            id="signup-password"
+            placeholder="Password"
+            required
+          />
+          <button onclick="signupUser()">Sign up</button>
+          <p>
+            Already have an account?
+            <span class="link" onclick="showLogin()">Login</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- <div class="meeting-buttons">
+        <button onclick="createMeeting()" class="meeting-btn">
+          Create Meeting
+        </button>
+        <button onclick="joinMeeting()" class="meeting-btn">
+          Join Meeting
+        </button>
+      </div> -->
+
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
