@@ -5,115 +5,12 @@
 }
 
 body {
-  margin: 0;
-  background: linear-gradient(135deg, #6a5acd, #3c8ce7);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  background-attachment: fixed;
+  color: #ffffff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
 }
-
-.container {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.2);
-  padding: 40px 30px;
-  max-width: 400px;
-  width: 90%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.project-title {
-  font-size: 2.6rem;
-  font-weight: bold;
-  color: #2954d2;
-  margin-bottom: 24px;
-  letter-spacing: 2px;
-}
-
-.form-container {
-  width: 100%;
-  margin-bottom: 24px;
-}
-
-.form {
-  display: none;
-  flex-direction: column;
-}
-
-.form.active {
-  display: flex;
-}
-
-.form h2 {
-  color: #3c8ce7;
-  margin-bottom: 10px;
-  font-size: 1.5rem;
-}
-
-.form input {
-  margin-bottom: 16px;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border 0.2s;
-}
-
-.form input:focus {
-  border-color: #3c8ce7;
-  outline: none;
-}
-
-.form button {
-  padding: 10px 0;
-  background: #3c8ce7;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.form button:hover {
-  background: #2954d2;
-}
-
-.link {
-  color: #3c8ce7;
-  text-decoration: underline;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.meeting-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.meeting-btn {
-  padding: 10px 24px;
-  background: linear-gradient(90deg, #3c8ce7 60%, #6a5acd 100%);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  font-weight: 600;
-  box-shadow: 0px 2px 7px rgba(60, 140, 231, 0.18);
-  transition: background 0.2s;
-}
-
-.meeting-btn:hover {
-  background: linear-gradient(90deg, #2954d2 60%, #3c8ce7 100%);
-}
-
 
 /* ===== LANDING PAGE STYLES ===== */
 .heading {
@@ -330,6 +227,39 @@ body {
   padding: 0;
   border-left: 2px solid rgba(102, 126, 234, 0.3);
   height: 100vh;
+  border-bottom-right-radius: 32px;
+  /* box-shadow removed for seamless look with controls bar */
+  overflow: hidden;
+  color: #fff;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+  will-change: transform, opacity;
+  z-index: 1001;
+}
+
+.chat-sidebar.collapsed {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 1200px) {
+  .chat-sidebar {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 32px;
+  }
+  .chat-sidebar.collapsed {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 1200px) {
+  .chat-sidebar.collapsed {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 .chat-title {
@@ -343,22 +273,26 @@ body {
 }
 
 .messages {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1 1 0%;
+  overflow-y: auto !important;
   padding: 20px;
   list-style: none;
   margin: 0;
+  max-height: calc(100vh - 200px);
+  min-height: 0;
 }
 
 .msg {
-  background: rgba(102, 126, 234, 0.2);
-  color: #ffffff;
+  background: rgba(30, 40, 80, 0.95);
+  color: #fff;
   margin-bottom: 12px;
   border-radius: 12px;
   padding: 12px 16px;
   border-left: 4px solid #667eea;
   animation: slideIn 0.3s ease;
   word-wrap: break-word;
+  font-size: 1.1rem;
+  line-height: 1.5;
 }
 
 @keyframes slideIn {
@@ -415,7 +349,9 @@ body {
   align-items: center;
   gap: 40px;
   padding: 20px;
-  z-index: 1000;
+  z-index: 1002;
+  border-top-right-radius: 32px;
+  margin-right: -1px;
   height: 80px;
   border-top: 2px solid rgba(102, 126, 234, 0.3);
 }

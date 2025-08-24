@@ -71,10 +71,10 @@
     </nav>
 
     <script>
-      // Toggle chat visibility
+      // Toggle chat sidebar with class for smooth transition
       function toggleChat() {
-        const chatSidebar = document.querySelector('.chat-sidebar');
-        chatSidebar.style.display = chatSidebar.style.display === 'none' ? 'block' : 'none';
+        const chatSidebar = document.querySelector(".chat-sidebar");
+        chatSidebar.classList.toggle("collapsed");
       }
     </script>
   </body>
