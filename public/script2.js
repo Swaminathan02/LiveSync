@@ -48,23 +48,39 @@ navigator.mediaDevices
     });
 
     // Handle chat input with Enter key
+    // Handle chat input for both sidebar and floating chat
+    function sendChatMessage(msg) {
+      if (!msg) return;
+      socket.emit("message", {
+        text: msg,
+        username: USERNAME,
+      });
+    }
+    // Sidebar chat input
     let txt = $("#chat-input");
-
     $("html").keydown((event) => {
-      if (event.which == 13 && txt.val().length !== 0) {
-        console.log(`Sending message: ${txt.val()}`);
-        socket.emit("message", {
-          text: txt.val(),
-          username: USERNAME,
-        });
+      if (event.which == 13 && txt.is(":focus") && txt.val().length !== 0) {
+        sendChatMessage(txt.val());
         txt.val("");
+      }
+    });
+    // Floating chat input
+    let txtFloat = $("#chat-input-float");
+    txtFloat.on("keydown", function (event) {
+      if (event.which == 13 && txtFloat.val().length !== 0) {
+        sendChatMessage(txtFloat.val());
+        txtFloat.val("");
       }
     });
 
     // Listen for incoming messages
+    // Listen for incoming messages (show in both chat areas)
     socket.on("createMessage", (msg) => {
       console.log(`Received message from ${msg.username}: ${msg.text}`);
-      $(".messages").append(
+      $(".chat-sidebar .messages").append(
+        `<li class="msg"><b>${msg.username}:</b> <br> ${msg.text}</li>`
+      );
+      $("#floating-chat .messages").append(
         `<li class="msg"><b>${msg.username}:</b> <br> ${msg.text}</li>`
       );
       scrollBottom();

@@ -37,7 +37,8 @@
       <aside class="chat-sidebar">
         <div class="chat-title">
           Chat
-          <small class="text-muted username-color">(You are: <%= username %>)</small
+          <small class="text-muted username-color"
+            >(You are: <%= username %>)</small
           >
         </div>
         <ul class="messages"></ul>
@@ -50,6 +51,148 @@
           />
         </div>
       </aside>
+      <!-- Floating Chat Window for Mobile -->
+      <div
+        id="floating-chat"
+        aria-modal="true"
+        aria-label="Chat window"
+        style="
+          display: none;
+          position: fixed;
+          bottom: 90px;
+          right: 16px;
+          width: 92vw;
+          max-width: 400px;
+          min-width: 200px;
+          background: rgba(26, 26, 46, 0.98);
+          border-radius: 18px;
+          box-shadow: 0 4px 32px #0008;
+          z-index: 3000;
+          flex-direction: column;
+          transition: box-shadow 0.2s;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            border-bottom: 1px solid #333;
+            background: rgba(102, 126, 234, 0.15);
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+          "
+        >
+          <span style="font-weight: 700; color: #667eea">Chat</span>
+          <button
+            id="close-chat"
+            aria-label="Close chat"
+            style="
+              background: none;
+              border: none;
+              color: #fff;
+              font-size: 1.3rem;
+              cursor: pointer;
+            "
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <ul
+          class="messages"
+          style="
+            flex: 1 1 0%;
+            overflow-y: auto;
+            padding: 12px;
+            margin: 0;
+            max-height: 180px;
+            min-height: 60px;
+            background: transparent;
+          "
+        ></ul>
+        <div
+          class="chat-input-wrapper"
+          style="
+            padding: 10px;
+            background: rgba(15, 15, 35, 0.9);
+            border-top: 1px solid #222;
+          "
+        >
+          <input
+            type="text"
+            id="chat-input-float"
+            class="chat-input"
+            placeholder="Type your messages and press Enter..."
+            style="width: 100%; border-radius: 10px; padding: 8px 12px"
+            aria-label="Type your message"
+          />
+        </div>
+      </div>
+      <script>
+        // Floating chat logic for mobile: always fixed, not draggable
+        function isMobile() {
+          return window.innerWidth <= 900;
+        }
+        const chatSidebar = document.querySelector(".chat-sidebar");
+        const floatingChat = document.getElementById("floating-chat");
+        const chatBtn = document.querySelector(
+          '.controls-bar .control-btn[onclick="toggleChat()"]'
+        );
+        const closeChatBtn = document.getElementById("close-chat");
+
+        function updateChatDisplay() {
+          if (isMobile()) {
+            chatSidebar.style.display = "none";
+            // Only show floating chat if it was open before
+            if (!floatingChat.dataset.open) {
+              floatingChat.style.display = "none";
+            } else {
+              floatingChat.style.display = "flex";
+            }
+            // Always reset position for mobile
+            floatingChat.style.bottom = "90px";
+            floatingChat.style.right = "16px";
+            floatingChat.style.left = "";
+            floatingChat.style.top = "";
+          } else {
+            chatSidebar.style.display = "";
+            floatingChat.style.display = "none";
+            floatingChat.dataset.open = "";
+          }
+        }
+        window.addEventListener("resize", updateChatDisplay);
+        document.addEventListener("DOMContentLoaded", updateChatDisplay);
+
+        // Toggle chat button logic
+        if (chatBtn) {
+          chatBtn.addEventListener("click", function () {
+            if (isMobile()) {
+              // Toggle floating chat open/close
+              if (floatingChat.style.display === "flex") {
+                floatingChat.style.display = "none";
+                floatingChat.dataset.open = "";
+              } else {
+                floatingChat.style.display = "flex";
+                floatingChat.dataset.open = "1";
+                // Focus input for quick typing
+                setTimeout(() => {
+                  document.getElementById("chat-input-float").focus();
+                }, 100);
+              }
+            } else {
+              chatSidebar.classList.toggle("collapsed");
+            }
+          });
+        }
+        // X button closes floating chat, but allows reopening with chat button
+        if (closeChatBtn) {
+          closeChatBtn.addEventListener("click", function () {
+            floatingChat.style.display = "none";
+            floatingChat.dataset.open = "";
+          });
+        }
+      </script>
     </div>
 
     <nav class="controls-bar">
@@ -69,10 +212,28 @@
     </nav>
 
     <script>
-      // Toggle chat sidebar with class for smooth transition
+      // Unified toggleChat for both desktop and mobile
+      function isMobile() {
+        return window.innerWidth <= 900;
+      }
       function toggleChat() {
         const chatSidebar = document.querySelector(".chat-sidebar");
-        chatSidebar.classList.toggle("collapsed");
+        const floatingChat = document.getElementById("floating-chat");
+        if (isMobile()) {
+          if (floatingChat.style.display === "flex") {
+            floatingChat.style.display = "none";
+            floatingChat.dataset.open = "";
+          } else {
+            floatingChat.style.display = "flex";
+            floatingChat.dataset.open = "1";
+            setTimeout(() => {
+              const input = document.getElementById("chat-input-float");
+              if (input) input.focus();
+            }, 100);
+          }
+        } else {
+          chatSidebar.classList.toggle("collapsed");
+        }
       }
     </script>
   </body>

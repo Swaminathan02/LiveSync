@@ -1,17 +1,3 @@
-<!-- Logout Button -->
-<form
-  action="/logout"
-  method="POST"
-  style="position: absolute; top: 20px; right: 30px; z-index: 1000"
->
-  <button
-    type="submit"
-    class="btn btn-danger"
-    style="padding: 6px 18px; font-size: 1rem"
-  >
-    <i class="fas fa-sign-out-alt"></i> Logout
-  </button>
-</form>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -27,7 +13,15 @@
   </head>
   <body>
     <div class="dashboard-container">
-      <h1>LiveSync-Meet Dashboard</h1>
+      <div class="dashboard-header">
+        <h1>LiveSync-Meet Dashboard</h1>
+        <!-- Logout Button -->
+        <form action="/logout" method="POST" class="logout-form">
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </form>
+      </div>
 
       <!-- Show logged in user info -->
       <% if (typeof userInfo !== 'undefined' && userInfo) { %>
@@ -113,6 +107,24 @@
         margin: 50px auto;
         padding: 20px;
         font-family: Arial, sans-serif;
+      }
+
+      .dashboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+
+      .dashboard-header h1 {
+        margin: 0;
+        font-size: 2.2rem;
+        word-break: break-word;
+      }
+
+      .logout-form {
+        margin-left: auto;
       }
 
       .user-info {
@@ -206,16 +218,26 @@
       }
 
       @media (max-width: 600px) {
+        .dashboard-header {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
+        }
+        .dashboard-header h1 {
+          font-size: 1.4rem;
+          text-align: center;
+        }
+        .logout-form {
+          align-self: flex-end;
+        }
         .username-form,
         .join-form {
           flex-direction: column;
         }
-
         .username-form input,
         .join-form input {
           width: 100%;
         }
-
         .quick-actions {
           flex-direction: column;
         }
