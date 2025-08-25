@@ -241,6 +241,10 @@ body {
   pointer-events: none;
 }
 
+small.username-color {
+  color: rgb(200, 163, 248) !important;
+}
+
 @media (max-width: 1200px) {
   .chat-sidebar {
     border-bottom-right-radius: 0;

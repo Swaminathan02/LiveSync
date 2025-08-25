@@ -20,9 +20,9 @@ const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
   },
-  transports: ['websocket', 'polling']
+  transports: ["websocket", "polling"],
 });
 
 const peerServer = ExpressPeerServer(server, {
@@ -41,25 +41,31 @@ app.set("view engine", "ejs");
 
 app.use("/api", homerouter);
 
+app.post("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.redirect("/");
+});
+
 // Middleware to extract user info from JWT token or session
 const getUserInfo = (req, res, next) => {
   try {
     // Check for JWT token in cookies or Authorization header
-    const token = req.cookies?.token || 
-                  req.headers.authorization?.split(' ')[1] ||
-                  req.query.token;
-    
+    const token =
+      req.cookies?.token ||
+      req.headers.authorization?.split(" ")[1] ||
+      req.query.token;
+
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.userInfo = {
         username: decoded.username || decoded.name || decoded.user?.username,
         userId: decoded.userId || decoded.id || decoded.user?.id,
-        email: decoded.email || decoded.user?.email
+        email: decoded.email || decoded.user?.email,
       };
-      console.log('User info from token:', req.userInfo);
+      console.log("User info from token:", req.userInfo);
     }
   } catch (error) {
-    console.log('JWT verification failed:', error.message);
+    console.log("JWT verification failed:", error.message);
     req.userInfo = null;
   }
   next();
@@ -67,53 +73,47 @@ const getUserInfo = (req, res, next) => {
 
 app.get("/dashboard", getUserInfo, (req, res) => {
   // Pass user info to dashboard
-  res.render("dashboard", { 
-    userInfo: req.userInfo 
+  res.render("dashboard", {
+    userInfo: req.userInfo,
   });
 });
 
 app.get("/create-room", getUserInfo, (req, res) => {
   const roomId = uuid();
-  
+
   // Priority: URL query > user session > default
-  const username = req.query.username || 
-                   req.userInfo?.username || 
-                   "Anonymous";
-  
+  const username = req.query.username || req.userInfo?.username || "Anonymous";
+
   console.log(`Creating room ${roomId} for user: ${username}`);
   res.redirect(`/${roomId}?username=${encodeURIComponent(username)}`);
 });
 
 app.get("/join-room", getUserInfo, (req, res) => {
   const { roomId } = req.query;
-  
-  if (!roomId || roomId.trim() === '') {
-    return res.status(400).send('Room ID is required');
+
+  if (!roomId || roomId.trim() === "") {
+    return res.status(400).send("Room ID is required");
   }
-  
+
   // Priority: URL query > user session > default
-  const username = req.query.username || 
-                   req.userInfo?.username || 
-                   "Anonymous";
-  
+  const username = req.query.username || req.userInfo?.username || "Anonymous";
+
   console.log(`User ${username} joining room: ${roomId}`);
   res.redirect(`/${roomId}?username=${encodeURIComponent(username)}`);
 });
 
 app.get("/:room", getUserInfo, (req, res) => {
   const roomId = req.params.room;
-  
+
   // Priority: URL query > user session > default
-  const username = req.query.username || 
-                   req.userInfo?.username || 
-                   "Anonymous";
-  
+  const username = req.query.username || req.userInfo?.username || "Anonymous";
+
   console.log(`Rendering room ${roomId} for user: ${username}`);
-  
-  res.render("room", { 
-    roomId: roomId, 
+
+  res.render("room", {
+    roomId: roomId,
     username: username,
-    userInfo: req.userInfo
+    userInfo: req.userInfo,
   });
 });
 
@@ -124,8 +124,8 @@ app.get("/debug-user", getUserInfo, (req, res) => {
     query: req.query,
     headers: {
       authorization: req.headers.authorization,
-      cookie: req.headers.cookie
-    }
+      cookie: req.headers.cookie,
+    },
   });
 });
 
@@ -135,7 +135,7 @@ app.get("/debug-room/:room", getUserInfo, (req, res) => {
     roomId: req.params.room,
     query: req.query,
     userInfo: req.userInfo,
-    finalUsername: req.query.username || req.userInfo?.username || "Anonymous"
+    finalUsername: req.query.username || req.userInfo?.username || "Anonymous",
   });
 });
 
@@ -144,15 +144,13 @@ socketHandlers(io);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).send('Something went wrong!');
+  console.error("Server error:", err);
+  res.status(500).send("Something went wrong!");
 });
-
-
 
 // Handle 404 errors
 app.use((req, res) => {
-  res.status(404).send('Page not found');
+  res.status(404).send("Page not found");
 });
 
 server.listen(PORT, () => {

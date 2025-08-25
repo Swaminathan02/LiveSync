@@ -13,13 +13,12 @@ var peer = new Peer(undefined, {
       { urls: "stun:stun.l.google.com:19302" }, // Free Google STUN
       {
         urls: "turn:relay1.expressturn.com:3478",
-        username: "000000002071414040", 
+        username: "000000002071414040",
         credential: "j2pgZ9Yboh5X2I5+Ewl46wvd88M=",
       },
     ],
   },
 });
-
 
 let videoStream;
 const peers = {}; // Keep track of peer connections
@@ -50,13 +49,13 @@ navigator.mediaDevices
 
     // Handle chat input with Enter key
     let txt = $("#chat-input");
-    
+
     $("html").keydown((event) => {
       if (event.which == 13 && txt.val().length !== 0) {
         console.log(`Sending message: ${txt.val()}`);
-        socket.emit("message", { 
-          text: txt.val(), 
-          username: USERNAME 
+        socket.emit("message", {
+          text: txt.val(),
+          username: USERNAME,
         });
         txt.val("");
       }
@@ -85,12 +84,14 @@ navigator.mediaDevices
       // You can update the UI to reflect the new username if needed
     });
   })
-  .catch(err => {
+  .catch((err) => {
     console.error("Error accessing media devices:", err);
   });
 
 peer.on("open", (id) => {
-  console.log(`Peer opened with ID: ${id}, joining room: ${ROOM_ID} as ${USERNAME}`);
+  console.log(
+    `Peer opened with ID: ${id}, joining room: ${ROOM_ID} as ${USERNAME}`
+  );
   // Send username to server when joining room
   socket.emit("join-room", ROOM_ID, id, USERNAME);
 });
@@ -121,31 +122,37 @@ const scrollBottom = function () {
   div.scrollTop(div.prop("scrollHeight"));
 };
 
-function muteUnmute() {
-  if (!videoStream) {
-    console.log("No videoStream available for muteUnmute");
-    return;
-  }
+const muteUnmute = () => {
   const audioTrack = videoStream.getAudioTracks()[0];
-  if (!audioTrack) {
-    console.log("No audio track found");
-    return;
-  }
+  if (!audioTrack) return;
   audioTrack.enabled = !audioTrack.enabled;
-  console.log("Audio track enabled:", audioTrack.enabled);
   if (audioTrack.enabled) {
     setMuteButton();
   } else {
     setUnmuteButton();
   }
-}
+};
+
+const playStop = () => {
+  const videoTrack = videoStream.getVideoTracks()[0];
+  if (!videoTrack) return;
+  videoTrack.enabled = !videoTrack.enabled;
+  if (videoTrack.enabled) {
+    setStopVideo();
+    myvideo.style.display = "";
+  } else {
+    setPlayVideo();
+    myvideo.style.display = "none";
+  }
+};
 
 const setMuteButton = () => {
   const html = `
     <i class="fas fa-microphone"></i>
     <span>Mute</span>
   `;
-  document.querySelector(".main_mute_button").innerHTML = html;
+  const btn = document.querySelector(".main_mute_button");
+  if (btn) btn.innerHTML = html;
 };
 
 const setUnmuteButton = () => {
@@ -153,55 +160,39 @@ const setUnmuteButton = () => {
     <i class="unmute fas fa-microphone-slash"></i>
     <span>Unmute</span>
   `;
-  document.querySelector(".main_mute_button").innerHTML = html;
+  const btn = document.querySelector(".main_mute_button");
+  if (btn) btn.innerHTML = html;
 };
-
-function playStop() {
-  if (!videoStream) {
-    console.log("No videoStream available for playStop");
-    return;
-  }
-  const videoTrack = videoStream.getVideoTracks()[0];
-  if (!videoTrack) {
-    console.log("No video track found");
-    return;
-  }
-  videoTrack.enabled = !videoTrack.enabled;
-  console.log("Video track enabled:", videoTrack.enabled);
-  if (videoTrack.enabled) {
-    setStopVideo();
-  } else {
-    setPlayVideo();
-  }
-}
 
 const setStopVideo = () => {
   const html = `
     <i class="fas fa-video"></i>
     <span>Stop Video</span>
   `;
-  document.querySelector(".main_video_button").innerHTML = html;
+  const btn = document.querySelector(".main_video_button");
+  if (btn) btn.innerHTML = html;
 };
 
 const setPlayVideo = () => {
   const html = `
     <i class="stop fas fa-video-slash"></i>
-    <span>Start Video</span>
+    <span>Play Video</span>
   `;
-  document.querySelector(".main_video_button").innerHTML = html;
+  const btn = document.querySelector(".main_video_button");
+  if (btn) btn.innerHTML = html;
 };
 
-// Add click event listeners for mute and video buttons
-document.addEventListener('DOMContentLoaded', () => {
-  const muteButton = document.querySelector('.main_mute_button');
-  const videoButton = document.querySelector('.main_video_button');
-  
-  if (muteButton) {
-    muteButton.addEventListener('click', muteUnmute);
+// Set initial button state on page load
+window.addEventListener("DOMContentLoaded", () => {
+  const audioTrack = videoStream && videoStream.getAudioTracks()[0];
+  const videoTrack = videoStream && videoStream.getVideoTracks()[0];
+  if (audioTrack) {
+    if (audioTrack.enabled) setMuteButton();
+    else setUnmuteButton();
   }
-  
-  if (videoButton) {
-    videoButton.addEventListener('click', playStop);
+  if (videoTrack) {
+    if (videoTrack.enabled) setStopVideo();
+    else setPlayVideo();
   }
 });
 
@@ -213,7 +204,7 @@ document.getElementById("share_screen").addEventListener("click", async () => {
     });
 
     const screenTrack = screenStream.getVideoTracks()[0];
-    
+
     // Notify others about screen sharing
     socket.emit("start-screen-share");
 
@@ -231,7 +222,7 @@ document.getElementById("share_screen").addEventListener("click", async () => {
 
     // Replace local video display
     myvideo.srcObject = screenStream;
-    
+
     screenTrack.onended = async () => {
       try {
         const camStream = await navigator.mediaDevices.getUserMedia({
@@ -239,7 +230,7 @@ document.getElementById("share_screen").addEventListener("click", async () => {
           audio: true,
         });
         const camTrack = camStream.getVideoTracks()[0];
-        
+
         // Notify others that screen sharing stopped
         socket.emit("stop-screen-share");
 
@@ -280,25 +271,25 @@ socket.on("screen-share-stopped", (userId) => {
 
 const leaveMeeting = function () {
   console.log("Leaving meeting...");
-  
+
   if (videoStream) {
     videoStream.getTracks().forEach((track) => track.stop());
   }
-  
+
   // Close all peer connections
   for (let userId in peers) {
     if (peers[userId]) {
       peers[userId].close();
     }
   }
-  
+
   if (peer && peer.destroy) {
     peer.destroy();
   }
-  
+
   if (socket && socket.disconnect) {
     socket.disconnect();
   }
-  
+
   window.location.href = "/dashboard";
 };
