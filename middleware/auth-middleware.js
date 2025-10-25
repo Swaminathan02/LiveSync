@@ -3,12 +3,10 @@ import jwt from "jsonwebtoken";
 export const requireAuth = (req, res, next) => {
   const token =
     req.cookies?.token ||
-    req.headers.authorization?.split(" ")[1] ||
-    req.query.token;
+    req.headers.authorization?.split(" ")[1]
 
   const isApi =
     req.originalUrl?.startsWith("/api") ||
-    req.xhr ||
     (req.headers.accept || "").includes("application/json");
 
   if (!token) {
