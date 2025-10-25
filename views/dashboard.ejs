@@ -44,19 +44,6 @@
         >
           <i class="fas fa-plus"></i> Create Room
         </a>
-        <% } else { %>
-        <!-- User not logged in, ask for username -->
-        <form action="/create-room" method="GET" class="username-form">
-          <input
-            type="text"
-            name="username"
-            placeholder="Enter your name"
-            required
-          />
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create Room
-          </button>
-        </form>
         <% } %>
       </div>
 
@@ -71,23 +58,6 @@
             type="hidden"
             name="username"
             value="<%= userInfo.username %>"
-          />
-          <input
-            type="text"
-            name="roomId"
-            placeholder="Enter room ID"
-            required
-          />
-          <button type="submit" class="btn btn-secondary">
-            <i class="fas fa-sign-in-alt"></i> Join Room
-          </button>
-          <% } else { %>
-          <!-- User not logged in, ask for username -->
-          <input
-            type="text"
-            name="username"
-            placeholder="Enter your name"
-            required
           />
           <input
             type="text"
