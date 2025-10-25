@@ -3,7 +3,7 @@
 **LiveSync** is a real-time video conferencing web application inspired by Zoom, built using **Node.js**, **Express**, **Socket.IO**, **PeerJS**, and **EJS**. It allows multiple users to join rooms, stream video/audio via WebRTC, and communicate via chat — all in the browser.
 
 ## 🌐 Live Demo
-🔗 [Try it now on Render](https://livesync-8qy3.onrender.com/)
+🔗 [Try it now on Render](https://livesync-y2pl.onrender.com/)
 
 ## 🚀 Features
 

@@ -4,14 +4,13 @@ import { v4 as uuid } from "uuid";
 import { Server } from "socket.io";
 import { ExpressPeerServer } from "peer";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
-import { optionalAuth, requireAuth } from "./middleware/auth-middleware.js";
 
 import connectDB from "./database/db.js";
 import router from "./routes/auth-routes.js";
 import homerouter from "./routes/user-routes.js";
 import { socketHandlers } from "./socket/socket-handlers.js";
+import { requireAuth } from "./middleware/auth-middleware.js";
 
 dotenv.config();
 
@@ -43,9 +42,6 @@ app.use("/peerjs", peerServer);
 app.use("/api/auth", router);
 app.set("view engine", "ejs");
 
-// make user info optionally available to all routes/templates
-app.use(optionalAuth);
-
 app.use("/api", homerouter);
 
 app.post("/logout", (req, res) => {
@@ -53,34 +49,12 @@ app.post("/logout", (req, res) => {
   res.redirect("/");
 });
 
-// Health and debug routes should be defined before the catch-all room route
+// Health routes
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-app.get("/debug-user", optionalAuth, (req, res) => {
-  res.json({
-    cookies: req.cookies,
-    userInfo: req.userInfo,
-    query: req.query,
-    headers: {
-      authorization: req.headers.authorization,
-      cookie: req.headers.cookie,
-    },
-  });
-});
-
-// debug room info
-app.get("/debug-room/:room", optionalAuth, (req, res) => {
-  res.json({
-    roomId: req.params.room,
-    query: req.query,
-    userInfo: req.userInfo,
-    finalUsername: req.query.username || req.userInfo?.username || "Anonymous",
-  });
-});
-
-// Protected routes: require authentication. Unauthenticated users will be redirected to '/'.
+// Protected routes: require authentication else redirects to '/'
 app.get("/dashboard", requireAuth, (req, res) => {
   res.render("dashboard", {
     userInfo: req.userInfo,
@@ -106,7 +80,6 @@ app.get("/join-room", requireAuth, (req, res) => {
   res.redirect(`/${roomId}?username=${encodeURIComponent(username)}`);
 });
 
-// Protect room routes as well to prevent unauthenticated users from opening pages like /home or /welcome
 app.get("/:room", requireAuth, (req, res) => {
   const roomId = req.params.room;
   const username = req.query.username || req.userInfo?.username || "Anonymous";
